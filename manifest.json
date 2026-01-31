@@ -7,9 +7,6 @@
     "default_title": "PromptTemplates",
     "default_popup": "src/popup/popup.html"
   },
-  "background": {
-    "service_worker": "src/background/service_worker.js"
-  },
   "permissions": ["storage", "activeTab", "scripting"],
   "host_permissions": ["<all_urls>"],
   "content_scripts": [
