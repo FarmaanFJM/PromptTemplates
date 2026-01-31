@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "PromptTemplates",
+  "version": "0.1.0",
+  "description": "Create and reuse prompt templates with dynamic placeholders.",
+  "action": {
+    "default_title": "PromptTemplates",
+    "default_popup": "src/popup/popup.html"
+  },
+  "permissions": ["storage", "activeTab", "scripting"],
+  "host_permissions": ["<all_urls>"],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["src/content/content_script.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}
