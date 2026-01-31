@@ -4,7 +4,7 @@ import {
   renderTemplate,
   validateTemplateImportPayload
 } from "../shared/templating.js";
-
+console.log("popup.js loaded");
 const templateList = document.getElementById("templateList");
 const templateDescription = document.getElementById("templateDescription");
 const promptTemplateInput = document.getElementById("promptTemplateInput");
