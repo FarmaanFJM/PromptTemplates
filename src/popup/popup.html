@@ -21,22 +21,18 @@
           <div id="templateList" class="template-list"></div>
         </aside>
 
-        <section class="layout-shell__overview">
+        <section class="layout-shell__main">
           <div class="overview__header">
-            <h2>Overview</h2>
+            <h2>Prompt Layout</h2>
             <p id="templateDescription" class="muted"></p>
           </div>
           <div id="overviewPreview" class="overview-preview"></div>
           <div id="overviewInputs" class="overview-inputs"></div>
+          <div id="promptSections" class="prompt-sections"></div>
           <div class="overview-output">
             <h3>Rendered Prompt</h3>
-            <textarea id="renderedOutput" class="field__input" rows="6" readonly></textarea>
+            <textarea id="renderedOutput" class="field__input" rows="8" readonly></textarea>
           </div>
-        </section>
-
-        <section class="layout-shell__prompt">
-          <h2>Prompt</h2>
-          <div id="promptSections" class="prompt-sections"></div>
         </section>
 
         <section class="layout-shell__actions">
@@ -52,7 +48,7 @@
             <textarea
               id="exportTemplateOutput"
               class="field__input"
-              rows="4"
+              rows="8"
               readonly
             ></textarea>
             <button id="exportCopyButton" class="button">Copy export</button>
@@ -62,7 +58,7 @@
             <textarea
               id="importTemplateInput"
               class="field__input"
-              rows="4"
+              rows="8"
               placeholder="Paste a prompttemplate:// link"
             ></textarea>
             <button id="importTemplateButton" class="button">Import</button>

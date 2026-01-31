@@ -22,7 +22,8 @@ body {
 }
 
 .app {
-  width: 720px;
+  width: 980px;
+  min-height: 100vh;
   padding: 16px;
   display: flex;
   flex-direction: column;
@@ -68,17 +69,17 @@ body {
 
 .layout-shell {
   display: grid;
-  grid-template-columns: 220px minmax(0, 1fr) 240px;
+  grid-template-columns: 220px minmax(0, 1fr) 260px;
   gap: 16px;
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: 16px;
   padding: 16px;
+  min-height: 85vh;
 }
 
 .layout-shell__sidebar,
-.layout-shell__overview,
-.layout-shell__prompt,
+.layout-shell__main,
 .layout-shell__actions {
   display: flex;
   flex-direction: column;
@@ -90,7 +91,7 @@ body {
   padding-right: 12px;
 }
 
-.layout-shell__overview {
+.layout-shell__main {
   border-right: 1px solid var(--border);
   padding-right: 12px;
 }
@@ -147,6 +148,14 @@ body {
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+.layout-shell__actions {
+  align-self: stretch;
+}
+
+.layout-shell__actions .field__input {
+  min-height: 140px;
 }
 
 .token {
