@@ -12,7 +12,7 @@
         <h1>PromptLayouts</h1>
       </header>
 
-      <section class="card layout-shell">
+      <section class="layout-shell">
         <aside class="layout-shell__sidebar">
           <div class="sidebar__header">
             <h2>Layouts</h2>
@@ -21,96 +21,56 @@
           <div id="templateList" class="template-list"></div>
         </aside>
 
-        <div class="layout-shell__preview">
-          <div class="preview__header">
-            <div>
-              <h2 id="previewTitle">Select a layout</h2>
-              <p id="templateDescription" class="muted"></p>
-            </div>
+        <section class="layout-shell__overview">
+          <div class="overview__header">
+            <h2>Overview</h2>
+            <p id="templateDescription" class="muted"></p>
+          </div>
+          <div id="overviewPreview" class="overview-preview"></div>
+          <div id="overviewInputs" class="overview-inputs"></div>
+          <div class="overview-output">
+            <h3>Rendered Prompt</h3>
+            <textarea id="renderedOutput" class="field__input" rows="6" readonly></textarea>
+          </div>
+        </section>
+
+        <section class="layout-shell__prompt">
+          <h2>Prompt</h2>
+          <div id="promptSections" class="prompt-sections"></div>
+        </section>
+
+        <section class="layout-shell__actions">
+          <div class="actions-block">
+            <h2>Actions</h2>
             <div class="actions">
               <button id="copyButton" class="button">Copy</button>
               <button id="insertButton" class="button button--primary">Insert</button>
             </div>
           </div>
-
-          <div id="previewSections" class="preview-sections"></div>
-
-          <section class="card card--nested">
-            <div class="export-block">
-              <h3>Export Layout</h3>
-              <textarea
-                id="exportTemplateOutput"
-                class="field__input"
-                rows="3"
-                readonly
-              ></textarea>
-              <button id="exportCopyButton" class="button">Copy export</button>
-            </div>
-            <div class="import-block">
-              <h3>Import Layout</h3>
-              <textarea
-                id="importTemplateInput"
-                class="field__input"
-                rows="3"
-                placeholder="Paste a prompttemplate:// link"
-              ></textarea>
-              <button id="importTemplateButton" class="button">Import</button>
-              <p id="importStatus" class="muted" role="status" aria-live="polite"></p>
-            </div>
-          </section>
-        </div>
+          <div class="actions-block">
+            <h3>Export Layout</h3>
+            <textarea
+              id="exportTemplateOutput"
+              class="field__input"
+              rows="4"
+              readonly
+            ></textarea>
+            <button id="exportCopyButton" class="button">Copy export</button>
+          </div>
+          <div class="actions-block">
+            <h3>Import Layout</h3>
+            <textarea
+              id="importTemplateInput"
+              class="field__input"
+              rows="4"
+              placeholder="Paste a prompttemplate:// link"
+            ></textarea>
+            <button id="importTemplateButton" class="button">Import</button>
+            <p id="importStatus" class="muted" role="status" aria-live="polite"></p>
+          </div>
+        </section>
       </section>
 
-      <details class="card">
-        <summary class="summary">Advanced</summary>
-        <section class="card card--nested">
-          <div class="editor__header">
-            <h2>Template Editor</h2>
-            <div class="actions">
-              <button id="deleteTemplateButton" class="button">Delete</button>
-            </div>
-          </div>
-          <label class="field">
-            <span class="field__label">Name</span>
-            <input id="editorName" class="field__input" type="text" />
-          </label>
-          <label class="field">
-            <span class="field__label">Description</span>
-            <input id="editorDescription" class="field__input" type="text" />
-          </label>
-          <label class="field">
-            <span class="field__label">Template</span>
-            <textarea id="editorTemplate" class="field__input template-editor" rows="6"></textarea>
-          </label>
-          <div class="fields-editor">
-            <div class="fields-editor__header">
-              <h3>Fields Editor</h3>
-              <button id="addFieldButton" class="button">Add field</button>
-            </div>
-            <div id="fieldsEditorList" class="fields-editor__list"></div>
-          </div>
-        </section>
-
-        <section class="card card--nested">
-          <div class="actions">
-            <button id="pinTemplateButton" class="button">Pin</button>
-          </div>
-          <section id="warningsSection">
-            <h2>Warnings</h2>
-            <div class="warnings">
-              <div>
-                <h3>Unknown placeholders</h3>
-                <ul id="unknownPlaceholdersList" class="warnings__list"></ul>
-              </div>
-              <div>
-                <h3>Unused fields</h3>
-                <ul id="unusedFieldsList" class="warnings__list"></ul>
-              </div>
-            </div>
-            <p id="warningsEmpty" class="muted">No warnings.</p>
-          </section>
-        </section>
-      </details>
       <p id="statusMessage" class="muted" role="status" aria-live="polite"></p>
     </main>
 

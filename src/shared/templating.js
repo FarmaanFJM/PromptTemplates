@@ -120,3 +120,37 @@ export function composeTemplateSections(sections) {
     })
     .join("\n\n");
 }
+
+export function extractOverviewTokens(text) {
+  const parts = [];
+  const variables = new Set();
+  const blocks = new Set();
+  const regex = /\{\{([^}]+)\}\}|\{(?!\{)([^}]+)\}/g;
+  let lastIndex = 0;
+  let match = regex.exec(text);
+  while (match) {
+    if (match.index > lastIndex) {
+      parts.push({ type: "text", value: text.slice(lastIndex, match.index) });
+    }
+    if (match[1]) {
+      const key = match[1].trim();
+      variables.add(key);
+      parts.push({ type: "variable", label: `{{${key}}}` });
+    } else if (match[2]) {
+      const key = match[2].trim();
+      blocks.add(key);
+      parts.push({ type: "block", label: `{${key}}` });
+    }
+    lastIndex = regex.lastIndex;
+    match = regex.exec(text);
+  }
+  if (lastIndex < text.length) {
+    parts.push({ type: "text", value: text.slice(lastIndex) });
+  }
+
+  return {
+    parts,
+    variables: Array.from(variables),
+    blocks: Array.from(blocks)
+  };
+}
