@@ -10,6 +10,8 @@
   --card: #ffffff;
   --surface: #ffffff;
   --primary: #2c6bed;
+  --primary-hover: #245cd3;
+  --button-hover: #f1f4f9;
   --toast-bg: #1f2532;
   --toast-text: #ffffff;
 }
@@ -33,6 +35,8 @@ body.theme--dark {
   --card: #202123;
   --surface: #2b2d31;
   --primary: #10a37f;
+  --primary-hover: #0c8f6e;
+  --button-hover: #34363b;
   --toast-bg: #2b2d31;
   --toast-text: #f1f1f1;
 }
@@ -131,6 +135,11 @@ body.theme--dark {
   gap: 8px;
 }
 
+.sidebar__actions {
+  display: flex;
+  gap: 6px;
+}
+
 .template-list {
   display: flex;
   flex-direction: column;
@@ -207,12 +216,36 @@ body.theme--dark {
   cursor: pointer;
   font-weight: 600;
   color: var(--text);
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.button:hover,
+.button:focus-visible {
+  background: var(--button-hover);
+  border-color: var(--primary);
+}
+
+.button:active {
+  transform: translateY(1px);
 }
 
 .button--primary {
   background: var(--primary);
   color: #fff;
   border-color: var(--primary);
+}
+
+.button--primary:hover,
+.button--primary:focus-visible {
+  background: var(--primary-hover);
+  border-color: var(--primary-hover);
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .button--ghost {
