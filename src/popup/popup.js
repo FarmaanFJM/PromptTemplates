@@ -24,11 +24,23 @@ let state = null;
 let currentTemplateId = null;
 let variableValues = {};
 let blockValues = {};
+let statusTimeout = null;
 
 const SHARE_PREFIX = "prompttemplate://";
 
 function setStatus(message) {
   statusMessage.textContent = message;
+  if (!message) {
+    statusMessage.classList.remove("toast--visible");
+    return;
+  }
+  statusMessage.classList.add("toast--visible");
+  if (statusTimeout) {
+    window.clearTimeout(statusTimeout);
+  }
+  statusTimeout = window.setTimeout(() => {
+    statusMessage.classList.remove("toast--visible");
+  }, 2200);
 }
 
 function setImportStatus(message) {

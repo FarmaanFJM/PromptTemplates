@@ -1,209 +1,43 @@
 export const DEFAULT_TEMPLATES = [
   {
-    id: "bug-report",
-    name: "Bug Report",
-    description: "Structured bug report with context and repro steps",
+    id: "design-brief",
+    name: "Design Brief",
+    description: "Clarify goals, context, and output requirements before writing prompts.",
     template:
-      "## Summary\n{{summary}}\n\n## Environment\n{{environment}}\n\n## Steps to Reproduce\n{{steps}}\n\n## Expected Result\n{{expected}}\n\n## Actual Result\n{{actual}}",
-    fields: [
-      {
-        key: "summary",
-        label: "Summary",
-        type: "text",
-        default: "",
-        options: []
-      },
-      {
-        key: "environment",
-        label: "Environment",
-        type: "text",
-        default: "",
-        options: []
-      },
-      {
-        key: "steps",
-        label: "Steps to Reproduce",
-        type: "textarea",
-        default: "",
-        options: []
-      },
-      {
-        key: "expected",
-        label: "Expected Result",
-        type: "textarea",
-        default: "",
-        options: []
-      },
-      {
-        key: "actual",
-        label: "Actual Result",
-        type: "text",
-        default: "",
-        options: []
-      }
-    ]
+      "## Context\n{Context}\n\n## Objective\n{Objective}\n\n## Audience\n{{Audience}}\n\n## Tone & Style\n{{Tone}}\n\n## Constraints\n{Constraints}\n\n## Output Requirements\n{OutputRequirements}\n\n## Success Criteria\n{SuccessCriteria}",
+    fields: []
   },
   {
-    id: "user-story",
-    name: "User Story",
-    description: "Simple user story layout",
+    id: "execution-plan",
+    name: "Execution Plan",
+    description: "Align delivery steps, files, and validation before implementing.",
     template:
-      "## Story\nAs a {{role}}, I want {{goal}} so that {{benefit}}.\n\n## Acceptance Criteria\n{{criteria}}\n\n## Notes\n{{notes}}",
-    fields: [
-      {
-        key: "role",
-        label: "Role",
-        type: "text",
-        default: "",
-        options: []
-      },
-      {
-        key: "goal",
-        label: "Goal",
-        type: "text",
-        default: "",
-        options: []
-      },
-      {
-        key: "benefit",
-        label: "Benefit",
-        type: "text",
-        default: "",
-        options: []
-      },
-      {
-        key: "criteria",
-        label: "Acceptance Criteria",
-        type: "textarea",
-        default: "",
-        options: []
-      },
-      {
-        key: "notes",
-        label: "Notes",
-        type: "textarea",
-        default: "",
-        options: []
-      }
-    ]
+      "## Summary\n{Summary}\n\n## Plan\n{Plan}\n\n## Files & Areas\n{Files}\n\n## Risks & Mitigations\n{Risks}\n\n## Validation\n{Validation}",
+    fields: []
   },
   {
-    id: "code-review",
-    name: "Code Review",
-    description: "Review checklist with focus areas",
+    id: "review-checklist",
+    name: "Review Checklist",
+    description: "Capture what to verify and edge cases before final output.",
     template:
-      "## Overview\n{{overview}}\n\n## Risks\n{{risks}}\n\n## Questions\n{{questions}}\n\n## Follow-ups\n{{followups}}",
-    fields: [
-      {
-        key: "overview",
-        label: "Overview",
-        type: "textarea",
-        default: "",
-        options: []
-      },
-      {
-        key: "risks",
-        label: "Risks",
-        type: "textarea",
-        default: "",
-        options: []
-      },
-      {
-        key: "questions",
-        label: "Questions",
-        type: "textarea",
-        default: "",
-        options: []
-      },
-      {
-        key: "followups",
-        label: "Follow-ups",
-        type: "textarea",
-        default: "",
-        options: []
-      }
-    ]
+      "## Scope\n{Scope}\n\n## Checks\n{Checks}\n\n## Edge Cases\n{EdgeCases}\n\n## Notes\n{Notes}",
+    fields: []
   },
   {
-    id: "meeting-notes",
-    name: "Meeting Notes",
-    description: "Capture agenda, decisions, and action items",
+    id: "role-instruction-architect",
+    name: "Role Instruction (Architect / Functionality Author)",
+    description: "Direct a primary author to design and explain full, ordered batches.",
     template:
-      "## Agenda\n{{agenda}}\n\n## Notes\n{{notes}}\n\n## Decisions\n{{decisions}}\n\n## Action Items\n{{actions}}",
-    fields: [
-      {
-        key: "agenda",
-        label: "Agenda",
-        type: "textarea",
-        default: "",
-        options: []
-      },
-      {
-        key: "notes",
-        label: "Notes",
-        type: "textarea",
-        default: "",
-        options: []
-      },
-      {
-        key: "decisions",
-        label: "Decisions",
-        type: "textarea",
-        default: "",
-        options: []
-      },
-      {
-        key: "actions",
-        label: "Action Items",
-        type: "textarea",
-        default: "",
-        options: []
-      }
-    ]
+      "Role Instruction (Architect / Functionality Author)\n\nYou are the primary code author and functionality designer.\nYour responsibility is to design and generate correct, high-quality code and explain what files must be updated and how.\nIf the total output is large, do not reduce quality or decide to give other code in next prompt. Instead, divide the output into clear batches,\neach containing a list of complete files (never partial files). Always provide the recommended batch order (e.g. Batch 1, Batch 2, Batch 3) so the implementation agent can apply them sequentially without context overflow. Do not optimize for tool execution or minimal diffs—optimize for clarity, correctness, and completeness.\n\n{ Task }\n\n==================================================================",
+    fields: []
   },
   {
-    id: "prd-outline",
-    name: "PRD Outline",
-    description: "Product requirements layout",
+    id: "role-instruction-executor",
+    name: "Role Instruction (Executor / Paster)",
+    description: "Strictly apply provided batches without inventing new behavior.",
     template:
-      "## Problem\n{{problem}}\n\n## Goals\n{{goals}}\n\n## Non-Goals\n{{nonGoals}}\n\n## Requirements\n{{requirements}}\n\n## Open Questions\n{{questions}}",
-    fields: [
-      {
-        key: "problem",
-        label: "Problem",
-        type: "textarea",
-        default: "",
-        options: []
-      },
-      {
-        key: "goals",
-        label: "Goals",
-        type: "textarea",
-        default: "",
-        options: []
-      },
-      {
-        key: "nonGoals",
-        label: "Non-Goals",
-        type: "textarea",
-        default: "",
-        options: []
-      },
-      {
-        key: "requirements",
-        label: "Requirements",
-        type: "textarea",
-        default: "",
-        options: []
-      },
-      {
-        key: "questions",
-        label: "Open Questions",
-        type: "textarea",
-        default: "",
-        options: []
-      }
-    ]
+      "Role Instruction (Executor / Paster)\n\nYou are an implementation-only agent.\nYour job is to apply code exactly as provided, file by file, in the specified batch order.\nYou are not allowed to invent functionality, refactor logic, or reinterpret intent.\nYou may only:\n\ncreate or overwrite files exactly as given\n\nfix obvious compiler errors (e.g. undefined types, missing imports) without changing runtime behavior\nIf anything is ambiguous or missing, stop and report it instead of guessing.\nYour goal is faithful application, not design.\n\n{ Task }\n\n==================================================================",
+    fields: []
   }
 ];
 
