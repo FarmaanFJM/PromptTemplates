@@ -1,18 +1,15 @@
 import { loadState, saveState } from "../shared/storage.js";
 import {
-  composeTemplateSections,
+  extractOverviewTokens,
   isValidTemplateSchema,
-  renderTemplate,
-  splitTemplateSections,
-  extractOverviewTokens
+  renderTemplate
 } from "../shared/templating.js";
 
 const templateList = document.getElementById("templateList");
-const overviewPreview = document.getElementById("overviewPreview");
+const templateDescription = document.getElementById("templateDescription");
+const promptTemplateInput = document.getElementById("promptTemplateInput");
 const overviewInputs = document.getElementById("overviewInputs");
 const renderedOutput = document.getElementById("renderedOutput");
-const promptSections = document.getElementById("promptSections");
-const templateDescription = document.getElementById("templateDescription");
 const exportTemplateOutput = document.getElementById("exportTemplateOutput");
 const exportCopyButton = document.getElementById("exportCopyButton");
 const importTemplateInput = document.getElementById("importTemplateInput");
@@ -69,8 +66,7 @@ function buildTemplateList() {
   });
 }
 
-function renderOverview(template) {
-  overviewPreview.innerHTML = "";
+function renderTemplateInputs(template) {
   overviewInputs.innerHTML = "";
   variableValues = {};
   blockValues = {};
@@ -83,23 +79,7 @@ function renderOverview(template) {
   }
 
   templateDescription.textContent = template.description;
-
-  const sections = splitTemplateSections(template.template);
-  const overview = sections[0]?.content ?? "";
-  const tokens = extractOverviewTokens(overview);
-
-  const fragment = document.createDocumentFragment();
-  tokens.parts.forEach((part) => {
-    if (part.type === "text") {
-      fragment.append(document.createTextNode(part.value));
-      return;
-    }
-    const chip = document.createElement("span");
-    chip.className = part.type === "block" ? "token token--block" : "token";
-    chip.textContent = part.label;
-    fragment.append(chip);
-  });
-  overviewPreview.append(fragment);
+  const tokens = extractOverviewTokens(template.template);
 
   tokens.variables.forEach((variable) => {
     variableValues[variable] = "";
@@ -139,39 +119,6 @@ function renderOverview(template) {
 
   exportTemplateOutput.value = encodeShareTemplate(template);
   updateRenderedOutput();
-}
-
-function renderPromptSections(template) {
-  promptSections.innerHTML = "";
-  if (!template) {
-    return;
-  }
-
-  const sections = splitTemplateSections(template.template);
-  sections.forEach((section, index) => {
-    const container = document.createElement("div");
-    container.className = "field";
-
-    const label = document.createElement("span");
-    label.className = "field__label";
-    label.textContent = section.title;
-
-    const textarea = document.createElement("textarea");
-    textarea.className = "field__input";
-    textarea.rows = 5;
-    textarea.value = section.content.trim();
-    textarea.addEventListener("input", () => {
-      sections[index].content = textarea.value;
-      template.template = composeTemplateSections(sections);
-      renderOverview(template);
-      updateRenderedOutput();
-      exportTemplateOutput.value = encodeShareTemplate(template);
-      saveState(state);
-    });
-
-    container.append(label, textarea);
-    promptSections.append(container);
-  });
 }
 
 function applyBlockValues(templateText) {
@@ -247,8 +194,8 @@ function decodeShareTemplate(payload) {
 function applyTemplateSelection(template) {
   currentTemplateId = template.id;
   buildTemplateList();
-  renderOverview(template);
-  renderPromptSections(template);
+  promptTemplateInput.value = template.template;
+  renderTemplateInputs(template);
 }
 
 async function init() {
@@ -266,6 +213,16 @@ async function init() {
     applyTemplateSelection(template);
   }
 }
+
+promptTemplateInput.addEventListener("input", () => {
+  const template = getTemplateById(currentTemplateId);
+  if (!template) {
+    return;
+  }
+  template.template = promptTemplateInput.value;
+  saveState(state);
+  renderTemplateInputs(template);
+});
 
 exportCopyButton.addEventListener("click", async () => {
   if (!exportTemplateOutput.value) {
@@ -309,7 +266,7 @@ newTemplateButton.addEventListener("click", () => {
     id: generateTemplateId(),
     name: "New layout",
     description: "",
-    template: "## Overview\n",
+    template: "Hi {{name}},\n\nThanks for reaching out about {{topic}}.",
     fields: []
   };
   state.templates.push(newTemplate);

@@ -23,12 +23,14 @@
 
         <section class="layout-shell__main">
           <div class="overview__header">
-            <h2>Prompt Layout</h2>
+            <h2>Prompt Template</h2>
             <p id="templateDescription" class="muted"></p>
           </div>
-          <div id="overviewPreview" class="overview-preview"></div>
+          <label class="field">
+            <span class="field__label">Template</span>
+            <textarea id="promptTemplateInput" class="field__input" rows="8"></textarea>
+          </label>
           <div id="overviewInputs" class="overview-inputs"></div>
-          <div id="promptSections" class="prompt-sections"></div>
           <div class="overview-output">
             <h3>Rendered Prompt</h3>
             <textarea id="renderedOutput" class="field__input" rows="8" readonly></textarea>

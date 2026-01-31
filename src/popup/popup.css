@@ -22,7 +22,7 @@ body {
 }
 
 .app {
-  width: 980px;
+  width: 100vw;
   min-height: 100vh;
   padding: 16px;
   display: flex;
@@ -69,13 +69,13 @@ body {
 
 .layout-shell {
   display: grid;
-  grid-template-columns: 220px minmax(0, 1fr) 260px;
+  grid-template-columns: 240px minmax(0, 1fr) 320px;
   gap: 16px;
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: 16px;
   padding: 16px;
-  min-height: 85vh;
+  min-height: calc(100vh - 80px);
 }
 
 .layout-shell__sidebar,
@@ -123,15 +123,6 @@ body {
   box-shadow: 0 0 0 1px var(--primary);
 }
 
-.overview-preview {
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 12px;
-  background: #fff;
-  min-height: 80px;
-  white-space: pre-wrap;
-}
-
 .overview-inputs {
   display: flex;
   flex-direction: column;
@@ -142,12 +133,6 @@ body {
   display: flex;
   flex-direction: column;
   gap: 6px;
-}
-
-.prompt-sections {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
 }
 
 .layout-shell__actions {
