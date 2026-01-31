@@ -37,9 +37,78 @@ export function validateTemplate(template, fields) {
   };
 }
 
-export function isValidTemplateSchema(template) {
+const TEMPLATE_KEYS = ["id", "name", "description", "template", "fields"];
+const FIELD_KEYS = ["key", "label", "type", "default", "options"];
+const ALLOWED_FIELD_TYPES = ["text", "textarea", "select"];
+
+export const DEFAULT_IMPORT_LIMITS = {
+  maxTemplates: 20,
+  maxIdLength: 64,
+  maxNameLength: 120,
+  maxDescriptionLength: 1000,
+  maxTemplateLength: 20000,
+  maxFields: 50,
+  maxFieldKeyLength: 64,
+  maxFieldLabelLength: 120,
+  maxFieldDefaultLength: 2000,
+  maxOptions: 100,
+  maxOptionLength: 120
+};
+
+function hasOnlyKeys(object, allowedKeys) {
+  return Object.keys(object).every((key) => allowedKeys.includes(key));
+}
+
+function validateTemplateField(field, limits) {
+  if (!field || typeof field !== "object") {
+    return "Each field must be an object.";
+  }
+  if (!hasOnlyKeys(field, FIELD_KEYS)) {
+    return "Field contains unknown keys.";
+  }
+  const { key, label, type, default: defaultValue, options } = field;
+  if (
+    typeof key !== "string" ||
+    typeof label !== "string" ||
+    typeof type !== "string" ||
+    typeof defaultValue !== "string" ||
+    !Array.isArray(options)
+  ) {
+    return "Field has invalid types.";
+  }
+  if (!ALLOWED_FIELD_TYPES.includes(type)) {
+    return "Field type is not allowed.";
+  }
+  if (key.length > limits.maxFieldKeyLength) {
+    return "Field key is too long.";
+  }
+  if (label.length > limits.maxFieldLabelLength) {
+    return "Field label is too long.";
+  }
+  if (defaultValue.length > limits.maxFieldDefaultLength) {
+    return "Field default value is too long.";
+  }
+  if (options.length > limits.maxOptions) {
+    return "Field has too many options.";
+  }
+  if (!options.every((option) => typeof option === "string")) {
+    return "Field options must be strings.";
+  }
+  if (options.some((option) => option.length > limits.maxOptionLength)) {
+    return "Field option is too long.";
+  }
+  if (type === "select" && options.length === 0) {
+    return "Select fields require options.";
+  }
+  return null;
+}
+
+function validateTemplateObject(template, limits) {
   if (!template || typeof template !== "object") {
-    return false;
+    return "Template must be an object.";
+  }
+  if (!hasOnlyKeys(template, TEMPLATE_KEYS)) {
+    return "Template contains unknown keys.";
   }
   const { id, name, description, template: rawTemplate, fields } = template;
   if (
@@ -49,36 +118,58 @@ export function isValidTemplateSchema(template) {
     typeof rawTemplate !== "string" ||
     !Array.isArray(fields)
   ) {
-    return false;
+    return "Template has invalid types.";
+  }
+  if (!id || id.length > limits.maxIdLength) {
+    return "Template id is missing or too long.";
+  }
+  if (!name || name.length > limits.maxNameLength) {
+    return "Template name is missing or too long.";
+  }
+  if (description.length > limits.maxDescriptionLength) {
+    return "Template description is too long.";
+  }
+  if (!rawTemplate || rawTemplate.length > limits.maxTemplateLength) {
+    return "Template body is missing or too long.";
+  }
+  if (fields.length > limits.maxFields) {
+    return "Template has too many fields.";
+  }
+  for (const field of fields) {
+    const fieldError = validateTemplateField(field, limits);
+    if (fieldError) {
+      return fieldError;
+    }
+  }
+  return null;
+}
+
+export function validateTemplateImportPayload(payload, limits = {}) {
+  const resolvedLimits = { ...DEFAULT_IMPORT_LIMITS, ...limits };
+  if (!payload || typeof payload !== "object") {
+    return { valid: false, error: "Import payload must be an object." };
+  }
+  if (!hasOnlyKeys(payload, ["templates"])) {
+    return { valid: false, error: "Import payload has unknown keys." };
+  }
+  if (!Array.isArray(payload.templates)) {
+    return { valid: false, error: "Import payload templates must be an array." };
+  }
+  if (payload.templates.length === 0) {
+    return { valid: false, error: "No templates found in import payload." };
+  }
+  if (payload.templates.length > resolvedLimits.maxTemplates) {
+    return { valid: false, error: "Too many templates in import payload." };
   }
 
-  return fields.every((field) => {
-    if (!field || typeof field !== "object") {
-      return false;
+  for (const template of payload.templates) {
+    const templateError = validateTemplateObject(template, resolvedLimits);
+    if (templateError) {
+      return { valid: false, error: templateError };
     }
-    const { key, label, type, default: defaultValue, options } = field;
-    if (
-      typeof key !== "string" ||
-      typeof label !== "string" ||
-      typeof type !== "string"
-    ) {
-      return false;
-    }
-    const allowedTypes = ["text", "textarea", "select"];
-    if (!allowedTypes.includes(type)) {
-      return false;
-    }
-    if (typeof defaultValue !== "string") {
-      return false;
-    }
-    if (type === "select") {
-      if (!Array.isArray(options)) {
-        return false;
-      }
-      return options.every((option) => typeof option === "string");
-    }
-    return Array.isArray(options);
-  });
+  }
+
+  return { valid: true, error: "" };
 }
 
 export function splitTemplateSections(template) {
