@@ -30,14 +30,14 @@ For Firefox:
 1. Open the extension popup.
 2. Select a template from the left pane.
 3. Edit the prompt template, fill in variable and block inputs, and review the rendered prompt.
-4. Use **Copy** or **Insert** to use the final prompt.
+    - Use `{{variable}}` for inputs and use `{ text }` for textareas.  
+4. Use **Copy Prompt** to use the final prompt.
 5. Use **Export Template** to share a template or **Import Template** to load one.
 
 ## Development
 - Source code lives under `src/`.
 - Popup UI: `src/popup/`
 - Shared helpers: `src/shared/`
-- Background worker: `src/background/`
 - Content script: `src/content/`
 
 ## License
