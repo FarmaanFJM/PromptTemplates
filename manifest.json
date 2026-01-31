@@ -5,7 +5,12 @@
   "description": "Create and reuse prompt templates with dynamic placeholders.",
   "browser_specific_settings": {
     "gecko": {
-      "id": "prompttemplates@farmaan.dev"
+      "id": "prompttemplates@farmaan.dev",
+      "data_collection_permissions": {
+        "required": [
+          "none"
+        ]
+      }
     }
   },
   "action": {
