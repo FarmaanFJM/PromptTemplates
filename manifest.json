@@ -3,6 +3,11 @@
   "name": "PromptTemplates",
   "version": "1.0.0",
   "description": "Create and reuse prompt templates with dynamic placeholders.",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "prompttemplates@farmaan.dev"
+    }
+  },
   "action": {
     "default_title": "PromptTemplates",
     "default_popup": "src/popup/popup.html"
