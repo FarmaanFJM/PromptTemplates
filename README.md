@@ -8,6 +8,7 @@ PromptTemplates is a lightweight browser extension for authoring reusable prompt
 - Auto-generated inputs for detected variables and blocks.
 - Rendered prompt preview with one-click copy or insert.
 - Local export/import via `prompttemplate://` links.
+- Optional light/dark theme toggle with ChatGPT-inspired styling.
 
 ## Installation (Unpacked)
 1. Clone this repository.

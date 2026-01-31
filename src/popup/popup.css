@@ -8,7 +8,10 @@
   --muted: #5c6475;
   --bg: #f7f8fa;
   --card: #ffffff;
+  --surface: #ffffff;
   --primary: #2c6bed;
+  --toast-bg: #1f2532;
+  --toast-text: #ffffff;
 }
 
 * {
@@ -19,6 +22,19 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
+}
+
+body.theme--dark {
+  color-scheme: dark;
+  --border: #2a2f3d;
+  --text: #f3f4f6;
+  --muted: #9aa3b2;
+  --bg: #0f1115;
+  --card: #171b26;
+  --surface: #111622;
+  --primary: #10a37f;
+  --toast-bg: #0f2a22;
+  --toast-text: #e8fff7;
 }
 
 .app {
@@ -33,6 +49,13 @@ body {
 .app__header h1 {
   font-size: 18px;
   margin: 0;
+}
+
+.app__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
 }
 
 .card {
@@ -65,6 +88,8 @@ body {
   padding: 8px;
   font-size: 13px;
   font-family: inherit;
+  background: var(--surface);
+  color: var(--text);
 }
 
 .layout-shell {
@@ -113,7 +138,7 @@ body {
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: 8px;
-  background: #fff;
+  background: var(--surface);
   text-align: left;
   cursor: pointer;
 }
@@ -173,17 +198,22 @@ body {
 
 .button {
   border: 1px solid var(--border);
-  background: #fff;
+  background: var(--surface);
   border-radius: 8px;
   padding: 8px 12px;
   cursor: pointer;
   font-weight: 600;
+  color: var(--text);
 }
 
 .button--primary {
   background: var(--primary);
   color: #fff;
   border-color: var(--primary);
+}
+
+.button--ghost {
+  background: transparent;
 }
 
 .muted {
@@ -198,8 +228,8 @@ body {
   bottom: 20px;
   padding: 10px 14px;
   border-radius: 10px;
-  background: #1f2532;
-  color: #fff;
+  background: var(--toast-bg);
+  color: var(--toast-text);
   font-size: 12px;
   font-weight: 600;
   box-shadow: 0 12px 30px rgba(31, 37, 50, 0.2);

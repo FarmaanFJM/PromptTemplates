@@ -19,12 +19,14 @@ const copyButton = document.getElementById("copyButton");
 const insertButton = document.getElementById("insertButton");
 const newTemplateButton = document.getElementById("newTemplateButton");
 const statusMessage = document.getElementById("statusMessage");
+const themeToggle = document.getElementById("themeToggle");
 
 let state = null;
 let currentTemplateId = null;
 let variableValues = {};
 let blockValues = {};
 let statusTimeout = null;
+let currentTheme = "light";
 
 const SHARE_PREFIX = "prompttemplate://";
 
@@ -45,6 +47,14 @@ function setStatus(message) {
 
 function setImportStatus(message) {
   importStatus.textContent = message;
+}
+
+function applyTheme(theme) {
+  currentTheme = theme === "dark" ? "dark" : "light";
+  document.body.classList.toggle("theme--dark", currentTheme === "dark");
+  themeToggle.textContent =
+    currentTheme === "dark" ? "Light mode" : "Dark mode";
+  themeToggle.setAttribute("aria-pressed", currentTheme === "dark");
 }
 
 function getTemplateById(id) {
@@ -194,8 +204,13 @@ async function init() {
     state.templates = [];
     await saveState(state);
   }
+  if (!state.theme) {
+    state.theme = "light";
+    await saveState(state);
+  }
 
   buildTemplateList();
+  applyTheme(state.theme);
   currentTemplateId = state.templates[0]?.id ?? null;
 
   if (currentTemplateId) {
@@ -265,5 +280,11 @@ newTemplateButton.addEventListener("click", () => {
 });
 
 copyButton.addEventListener("click", handleCopy);
+themeToggle.addEventListener("click", () => {
+  const nextTheme = currentTheme === "dark" ? "light" : "dark";
+  state.theme = nextTheme;
+  applyTheme(nextTheme);
+  saveState(state);
+});
 
 init();
