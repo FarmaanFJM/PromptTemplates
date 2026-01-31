@@ -80,3 +80,43 @@ export function isValidTemplateSchema(template) {
     return Array.isArray(options);
   });
 }
+
+export function splitTemplateSections(template) {
+  const lines = template.split("\n");
+  const sections = [];
+  let current = null;
+
+  lines.forEach((line) => {
+    if (line.startsWith("## ")) {
+      if (current) {
+        sections.push(current);
+      }
+      current = { title: line.slice(3).trim(), content: "" };
+      return;
+    }
+
+    if (!current) {
+      current = { title: "Overview", content: "" };
+    }
+
+    current.content = current.content
+      ? `${current.content}\n${line}`
+      : line;
+  });
+
+  if (current) {
+    sections.push(current);
+  }
+
+  return sections;
+}
+
+export function composeTemplateSections(sections) {
+  return sections
+    .map((section) => {
+      const header = `## ${section.title}`;
+      const body = section.content.trim();
+      return body ? `${header}\n${body}` : header;
+    })
+    .join("\n\n");
+}

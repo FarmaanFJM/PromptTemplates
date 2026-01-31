@@ -1,21 +1,25 @@
 import { loadState, saveState } from "../shared/storage.js";
 import {
+  composeTemplateSections,
   isValidTemplateSchema,
   renderTemplate,
+  splitTemplateSections,
   validateTemplate
 } from "../shared/templating.js";
 
-const templateSelect = document.getElementById("templateSelect");
+const templateList = document.getElementById("templateList");
+const previewTitle = document.getElementById("previewTitle");
 const templateDescription = document.getElementById("templateDescription");
-const fieldsForm = document.getElementById("fieldsForm");
-const renderedOutput = document.getElementById("renderedOutput");
+const previewSections = document.getElementById("previewSections");
+const exportTemplateOutput = document.getElementById("exportTemplateOutput");
+const exportCopyButton = document.getElementById("exportCopyButton");
+const importTemplateInput = document.getElementById("importTemplateInput");
+const importTemplateButton = document.getElementById("importTemplateButton");
+const importStatus = document.getElementById("importStatus");
 const copyButton = document.getElementById("copyButton");
 const insertButton = document.getElementById("insertButton");
 const statusMessage = document.getElementById("statusMessage");
 const pinTemplateButton = document.getElementById("pinTemplateButton");
-const shareTemplateButton = document.getElementById("shareTemplateButton");
-const importTemplateInput = document.getElementById("importTemplateInput");
-const importTemplateButton = document.getElementById("importTemplateButton");
 const newTemplateButton = document.getElementById("newTemplateButton");
 const deleteTemplateButton = document.getElementById("deleteTemplateButton");
 const editorName = document.getElementById("editorName");
@@ -38,6 +42,10 @@ function setStatus(message) {
   statusMessage.textContent = message;
 }
 
+function setImportStatus(message) {
+  importStatus.textContent = message;
+}
+
 function getTemplateById(id) {
   return state.templates.find((template) => template.id === id);
 }
@@ -52,61 +60,30 @@ function generateTemplateId() {
   return `${base}-${index}`;
 }
 
-function buildSelectOptions() {
-  templateSelect.innerHTML = "";
-  getOrderedTemplates().forEach((template) => {
-    const option = document.createElement("option");
-    option.value = template.id;
-    option.textContent = template.name || template.id;
-    templateSelect.append(option);
-  });
-}
-
-function buildFieldInput(field) {
-  const wrapper = document.createElement("label");
-  wrapper.className = "field";
-
-  const label = document.createElement("span");
-  label.className = "field__label";
-  label.textContent = field.label;
-
-  let input = null;
-  if (field.type === "textarea") {
-    input = document.createElement("textarea");
-    input.rows = 3;
-  } else if (field.type === "select") {
-    input = document.createElement("select");
-    field.options.forEach((optionValue) => {
-      const option = document.createElement("option");
-      option.value = optionValue;
-      option.textContent = optionValue;
-      input.append(option);
-    });
-  } else {
-    input = document.createElement("input");
-    input.type = "text";
-  }
-
-  input.value = fieldValues[field.key] ?? field.default ?? "";
-  input.addEventListener("input", () => {
-    fieldValues[field.key] = input.value;
-    updateRenderedOutput();
-  });
-
-  wrapper.append(label, input);
-  return wrapper;
-}
-
-function renderFields(template) {
-  fieldsForm.innerHTML = "";
+function setDefaultFieldValues(template) {
   fieldValues = {};
-
+  if (!template) {
+    return;
+  }
   template.fields.forEach((field) => {
     fieldValues[field.key] = field.default ?? "";
   });
+}
 
-  template.fields.forEach((field) => {
-    fieldsForm.append(buildFieldInput(field));
+function buildTemplateList() {
+  templateList.innerHTML = "";
+  getOrderedTemplates().forEach((template) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "template-list__item";
+    if (template.id === currentTemplateId) {
+      button.classList.add("is-active");
+    }
+    button.textContent = template.name || template.id;
+    button.addEventListener("click", () => {
+      applyTemplateSelection(template);
+    });
+    templateList.append(button);
   });
 }
 
@@ -143,10 +120,7 @@ function renderWarnings(template) {
 }
 
 function updateTemplateSelectLabel(template) {
-  const option = templateSelect.querySelector(`option[value="${template.id}"]`);
-  if (option) {
-    option.textContent = template.name || template.id;
-  }
+  buildTemplateList();
 }
 
 function updatePinButton(template) {
@@ -180,12 +154,10 @@ function renderFieldsEditor(template) {
     const keyInput = buildEditorInput("Key", field.key, (value) => {
       field.key = value;
       updateTemplate(template);
-      renderFields(template);
     });
     const labelInput = buildEditorInput("Label", field.label, (value) => {
       field.label = value;
       updateTemplate(template);
-      renderFields(template);
     });
 
     const typeSelect = document.createElement("label");
@@ -208,14 +180,12 @@ function renderFieldsEditor(template) {
       }
       updateTemplate(template);
       renderFieldsEditor(template);
-      renderFields(template);
     });
     typeSelect.append(typeLabel, select);
 
     const defaultInput = buildEditorInput("Default", field.default ?? "", (value) => {
       field.default = value;
       updateTemplate(template);
-      renderFields(template);
     });
 
     inputs.append(keyInput, labelInput, typeSelect, defaultInput);
@@ -230,7 +200,6 @@ function renderFieldsEditor(template) {
             .map((option) => option.trim())
             .filter(Boolean);
           updateTemplate(template);
-          renderFields(template);
         }
       );
       inputs.append(optionsInput);
@@ -249,7 +218,6 @@ function renderFieldsEditor(template) {
       template.fields[index] = temp;
       updateTemplate(template);
       renderFieldsEditor(template);
-      renderFields(template);
     });
 
     const moveDown = document.createElement("button");
@@ -262,7 +230,6 @@ function renderFieldsEditor(template) {
       template.fields[index] = temp;
       updateTemplate(template);
       renderFieldsEditor(template);
-      renderFields(template);
     });
 
     const removeButton = document.createElement("button");
@@ -272,7 +239,6 @@ function renderFieldsEditor(template) {
       template.fields.splice(index, 1);
       updateTemplate(template);
       renderFieldsEditor(template);
-      renderFields(template);
     });
 
     controls.append(moveUp, moveDown, removeButton);
@@ -300,11 +266,55 @@ function buildEditorInput(labelText, value, onChange) {
   return wrapper;
 }
 
+function renderPreview(template) {
+  previewSections.innerHTML = "";
+  if (!template) {
+    previewTitle.textContent = "Select a layout";
+    templateDescription.textContent = "";
+    exportTemplateOutput.value = "";
+    return;
+  }
+
+  previewTitle.textContent = template.name || template.id;
+  templateDescription.textContent = template.description;
+
+  const sections = splitTemplateSections(template.template);
+  sections.forEach((section, index) => {
+    const container = document.createElement("div");
+    container.className = "field";
+
+    const label = document.createElement("span");
+    label.className = "preview-section__header";
+    label.textContent = section.title;
+
+    const textarea = document.createElement("textarea");
+    textarea.className = "field__input";
+    textarea.rows = 4;
+    textarea.value = section.content.trim();
+    textarea.addEventListener("input", () => {
+      sections[index].content = textarea.value;
+      template.template = composeTemplateSections(sections);
+      editorTemplate.value = template.template;
+      renderWarnings(template);
+      setDefaultFieldValues(template);
+      updateRenderedOutput();
+      exportTemplateOutput.value = encodeShareTemplate(template);
+      saveState(state);
+    });
+
+    container.append(label, textarea);
+    previewSections.append(container);
+  });
+
+  exportTemplateOutput.value = encodeShareTemplate(template);
+}
+
 function updateTemplate(template) {
   updateTemplateSelectLabel(template);
-  templateDescription.textContent = template.description;
   updatePinButton(template);
   renderWarnings(template);
+  renderPreview(template);
+  setDefaultFieldValues(template);
   updateRenderedOutput();
   saveState(state);
 }
@@ -312,15 +322,14 @@ function updateTemplate(template) {
 function updateRenderedOutput() {
   const template = getTemplateById(currentTemplateId);
   if (!template) {
-    renderedOutput.value = "";
-    return;
+    return "";
   }
-  renderedOutput.value = renderTemplate(template.template, fieldValues);
+  return renderTemplate(template.template, fieldValues);
 }
 
 async function handleCopy() {
   try {
-    await navigator.clipboard.writeText(renderedOutput.value);
+    await navigator.clipboard.writeText(updateRenderedOutput());
     setStatus("Copied to clipboard.");
   } catch (error) {
     setStatus("Unable to copy to clipboard.");
@@ -337,7 +346,7 @@ async function handleInsert() {
   try {
     const response = await chrome.tabs.sendMessage(tab.id, {
       type: "INSERT_PROMPT",
-      payload: renderedOutput.value
+      payload: updateRenderedOutput()
     });
     if (response?.success) {
       setStatus("Inserted into page.");
@@ -409,6 +418,17 @@ function removeTemplateFromPinned(templateId) {
   });
 }
 
+function applyTemplateSelection(template) {
+  currentTemplateId = template.id;
+  setDefaultFieldValues(template);
+  buildTemplateList();
+  updateEditor(template);
+  renderWarnings(template);
+  updatePinButton(template);
+  renderPreview(template);
+  updateRenderedOutput();
+}
+
 async function init() {
   state = await loadState();
   if (!state.pinnedTemplatesByHost) {
@@ -421,34 +441,17 @@ async function init() {
   }
   currentHostname = await loadCurrentHostname();
 
-  buildSelectOptions();
+  buildTemplateList();
   currentTemplateId = state.templates[0]?.id ?? null;
 
   if (currentTemplateId) {
-    templateSelect.value = currentTemplateId;
     const template = getTemplateById(currentTemplateId);
-    templateDescription.textContent = template.description;
-    renderFields(template);
-    updateEditor(template);
-    renderWarnings(template);
-    updatePinButton(template);
-    updateRenderedOutput();
+    applyTemplateSelection(template);
   } else {
     renderWarnings(null);
     updatePinButton(null);
   }
 }
-
-templateSelect.addEventListener("change", () => {
-  currentTemplateId = templateSelect.value;
-  const template = getTemplateById(currentTemplateId);
-  templateDescription.textContent = template.description;
-  renderFields(template);
-  updateEditor(template);
-  renderWarnings(template);
-  updatePinButton(template);
-  updateRenderedOutput();
-});
 
 pinTemplateButton.addEventListener("click", () => {
   const template = getTemplateById(currentTemplateId);
@@ -465,35 +468,33 @@ pinTemplateButton.addEventListener("click", () => {
   }
   state.pinnedTemplatesByHost[currentHostname] = pinned;
   saveState(state);
-  buildSelectOptions();
-  templateSelect.value = template.id;
+  buildTemplateList();
   updatePinButton(template);
 });
 
-shareTemplateButton.addEventListener("click", async () => {
-  const template = getTemplateById(currentTemplateId);
-  if (!template) {
-    setStatus("No template selected.");
+exportCopyButton.addEventListener("click", async () => {
+  if (!exportTemplateOutput.value) {
+    setStatus("No layout selected.");
     return;
   }
-  const payload = encodeShareTemplate(template);
   try {
-    await navigator.clipboard.writeText(payload);
-    setStatus("Share link copied.");
+    await navigator.clipboard.writeText(exportTemplateOutput.value);
+    setStatus("Export copied.");
   } catch (error) {
-    setStatus("Unable to copy share link.");
+    setStatus("Unable to copy export.");
   }
 });
 
 importTemplateButton.addEventListener("click", () => {
+  setImportStatus("");
   const value = importTemplateInput.value.trim();
   if (!value.startsWith(SHARE_PREFIX)) {
-    setStatus("Invalid share link.");
+    setImportStatus("Invalid import link.");
     return;
   }
   const template = decodeShareTemplate(value);
   if (!template || !isValidTemplateSchema(template)) {
-    setStatus("Malformed template data.");
+    setImportStatus("Malformed layout data.");
     return;
   }
   const exists = state.templates.some((item) => item.id === template.id);
@@ -503,38 +504,22 @@ importTemplateButton.addEventListener("click", () => {
   }
   state.templates.push(newTemplate);
   saveState(state);
-  buildSelectOptions();
-  currentTemplateId = newTemplate.id;
-  templateSelect.value = currentTemplateId;
-  templateDescription.textContent = newTemplate.description;
-  renderFields(newTemplate);
-  updateEditor(newTemplate);
-  renderWarnings(newTemplate);
-  updatePinButton(newTemplate);
-  updateRenderedOutput();
+  applyTemplateSelection(newTemplate);
   importTemplateInput.value = "";
-  setStatus("Template imported.");
+  setImportStatus("Layout imported.");
 });
 
 newTemplateButton.addEventListener("click", () => {
   const newTemplate = {
     id: generateTemplateId(),
-    name: "New template",
+    name: "New layout",
     description: "",
-    template: "",
+    template: "## Overview\n",
     fields: []
   };
   state.templates.push(newTemplate);
   saveState(state);
-  buildSelectOptions();
-  currentTemplateId = newTemplate.id;
-  templateSelect.value = currentTemplateId;
-  templateDescription.textContent = newTemplate.description;
-  renderFields(newTemplate);
-  updateEditor(newTemplate);
-  renderWarnings(newTemplate);
-  updatePinButton(newTemplate);
-  updateRenderedOutput();
+  applyTemplateSelection(newTemplate);
 });
 
 deleteTemplateButton.addEventListener("click", () => {
@@ -551,27 +536,22 @@ deleteTemplateButton.addEventListener("click", () => {
   state.templates.splice(index, 1);
   removeTemplateFromPinned(deletedTemplate.id);
   saveState(state);
-  buildSelectOptions();
+  buildTemplateList();
   currentTemplateId = state.templates[0]?.id ?? null;
   if (currentTemplateId) {
-    templateSelect.value = currentTemplateId;
     const template = getTemplateById(currentTemplateId);
-    templateDescription.textContent = template.description;
-    renderFields(template);
-    updateEditor(template);
-    renderWarnings(template);
-    updatePinButton(template);
-    updateRenderedOutput();
+    applyTemplateSelection(template);
   } else {
     templateDescription.textContent = "";
-    fieldsForm.innerHTML = "";
     fieldsEditorList.innerHTML = "";
-    renderedOutput.value = "";
     editorName.value = "";
     editorDescription.value = "";
     editorTemplate.value = "";
     renderWarnings(null);
     updatePinButton(null);
+    previewTitle.textContent = "Select a layout";
+    previewSections.innerHTML = "";
+    exportTemplateOutput.value = "";
   }
 });
 
@@ -600,6 +580,7 @@ editorTemplate.addEventListener("input", () => {
   }
   template.template = editorTemplate.value;
   updateTemplate(template);
+  renderPreview(template);
 });
 
 addFieldButton.addEventListener("click", () => {
@@ -616,7 +597,6 @@ addFieldButton.addEventListener("click", () => {
   });
   updateTemplate(template);
   renderFieldsEditor(template);
-  renderFields(template);
 });
 
 copyButton.addEventListener("click", handleCopy);
