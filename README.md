@@ -12,8 +12,8 @@ PromptTemplates is a lightweight browser extension for authoring reusable prompt
 
 ## Screenshots
 
-![promptTemplatesScreenshot1](./src/assets/screenshots/promptTemplatesScreenshot.png)
-![promptTemplatesScreenshot2](./src/assets/screenshots/promptTemplatesLightScreenshot.png)
+![promptTemplatesScreenshot1](./docs/screenshots/promptTemplatesScreenshot.png)
+![promptTemplatesScreenshot2](./docs/screenshots/promptTemplatesLightScreenshot.png)
 
 
 ## Installation (Unpacked)
