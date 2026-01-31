@@ -10,6 +10,12 @@ PromptTemplates is a lightweight browser extension for authoring reusable prompt
 - Local export/import via `prompttemplate://` links.
 - Optional light/dark theme toggle with ChatGPT-inspired styling.
 
+## Screenshots
+
+![promptTemplatesScreenshot1](./src/assets/screenshots/promptTemplatesScreenshot.png)
+![promptTemplatesScreenshot2](./src/assets/screenshots/promptTemplatesLightScreenshot.png)
+
+
 ## Installation (Unpacked)
 1. Clone this repository.
 2. Open Chrome (or any Chromium browser) and navigate to `chrome://extensions`.
