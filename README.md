@@ -1,1 +1,37 @@
-sadasdas
+# PromptTemplates
+
+PromptTemplates is a lightweight browser extension for authoring reusable prompt layouts. It provides a three-pane popup that lets you pick a layout, edit the prompt template, fill variables and text blocks, and copy or insert the rendered prompt.
+
+## Features
+- Built-in prompt layouts (Bug Report, User Story, Code Review, Meeting Notes, PRD Outline).
+- Editable prompt template with `{{variables}}` and `{text blocks}`.
+- Auto-generated inputs for detected variables and blocks.
+- Rendered prompt preview with one-click copy or insert.
+- Local export/import via `prompttemplate://` links.
+
+## Installation (Unpacked)
+1. Clone this repository.
+2. Open Chrome (or any Chromium browser) and navigate to `chrome://extensions`.
+3. Enable **Developer mode**.
+4. Click **Load unpacked** and select the repository folder.
+
+For Firefox:
+1. Open `about:debugging#/runtime/this-firefox`.
+2. Click **Load Temporary Add-on** and select `manifest.json`.
+
+## Usage
+1. Open the extension popup.
+2. Select a layout from the left pane.
+3. Edit the prompt template, fill in variable and block inputs, and review the rendered prompt.
+4. Use **Copy** or **Insert** to use the final prompt.
+5. Use **Export Layout** to share a layout or **Import Layout** to load one.
+
+## Development
+- Source code lives under `src/`.
+- Popup UI: `src/popup/`
+- Shared helpers: `src/shared/`
+- Background worker: `src/background/`
+- Content script: `src/content/`
+
+## License
+MIT
