@@ -1,8 +1,8 @@
 import { loadState, saveState } from "../shared/storage.js";
 import {
   extractOverviewTokens,
-  isValidTemplateSchema,
-  renderTemplate
+  renderTemplate,
+  validateTemplateImportPayload
 } from "../shared/templating.js";
 
 const templateList = document.getElementById("templateList");
@@ -16,7 +16,6 @@ const importTemplateInput = document.getElementById("importTemplateInput");
 const importTemplateButton = document.getElementById("importTemplateButton");
 const importStatus = document.getElementById("importStatus");
 const copyButton = document.getElementById("copyButton");
-const insertButton = document.getElementById("insertButton");
 const newTemplateButton = document.getElementById("newTemplateButton");
 const deleteTemplateButton = document.getElementById("deleteTemplateButton");
 const statusMessage = document.getElementById("statusMessage");
@@ -30,6 +29,8 @@ let statusTimeout = null;
 let currentTheme = "light";
 
 const SHARE_PREFIX = "prompttemplate://";
+const MAX_IMPORT_CHARS = 100 * 1024;
+const BASE64_PATTERN = /^[A-Za-z0-9+/=]+$/;
 
 function setStatus(message) {
   statusMessage.textContent = message;
@@ -178,21 +179,31 @@ async function handleCopy() {
 }
 
 function encodeShareTemplate(template) {
-  const json = JSON.stringify(template);
+  const json = JSON.stringify({ templates: [template] });
   const base64 = btoa(unescape(encodeURIComponent(json)));
   return `${SHARE_PREFIX}${base64}`;
 }
 
 function decodeShareTemplate(payload) {
   if (!payload.startsWith(SHARE_PREFIX)) {
-    return null;
+    return { payload: null, error: "Invalid import link." };
   }
   const raw = payload.slice(SHARE_PREFIX.length);
+  if (!raw) {
+    return { payload: null, error: "Import link is empty." };
+  }
+  if (payload.length > SHARE_PREFIX.length + MAX_IMPORT_CHARS) {
+    return { payload: null, error: "Import payload exceeds 100KB limit." };
+  }
+  if (!BASE64_PATTERN.test(raw)) {
+    return { payload: null, error: "Import payload is not valid base64." };
+  }
   try {
     const json = decodeURIComponent(escape(atob(raw)));
-    return JSON.parse(json);
+    const parsed = JSON.parse(json);
+    return { payload: parsed, error: "" };
   } catch (error) {
-    return null;
+    return { payload: null, error: "Import payload could not be decoded." };
   }
 }
 
@@ -259,21 +270,32 @@ importTemplateButton.addEventListener("click", () => {
     setImportStatus("Invalid import link.");
     return;
   }
-  const template = decodeShareTemplate(value);
-  if (!template || !isValidTemplateSchema(template)) {
-    setImportStatus("Malformed template data.");
+  if (value.length > SHARE_PREFIX.length + MAX_IMPORT_CHARS) {
+    setImportStatus("Import payload exceeds 100KB limit.");
     return;
   }
-  const exists = state.templates.some((item) => item.id === template.id);
-  const newTemplate = { ...template };
-  if (exists) {
-    newTemplate.id = generateTemplateId();
+  const decoded = decodeShareTemplate(value);
+  if (!decoded.payload) {
+    setImportStatus(decoded.error || "Malformed template data.");
+    return;
   }
-  state.templates.push(newTemplate);
+  const validation = validateTemplateImportPayload(decoded.payload);
+  if (!validation.valid) {
+    setImportStatus(validation.error);
+    return;
+  }
+  const importedTemplates = decoded.payload.templates;
+  const newTemplates = importedTemplates.map((template) => {
+    const exists = state.templates.some((item) => item.id === template.id);
+    return exists ? { ...template, id: generateTemplateId() } : template;
+  });
+  state.templates.push(...newTemplates);
   saveState(state);
-  applyTemplateSelection(newTemplate);
+  applyTemplateSelection(newTemplates[0]);
   importTemplateInput.value = "";
-  setImportStatus("Template imported.");
+  setImportStatus(
+    newTemplates.length === 1 ? "Template imported." : "Templates imported."
+  );
 });
 
 newTemplateButton.addEventListener("click", () => {
