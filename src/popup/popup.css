@@ -26,15 +26,15 @@ body {
 
 body.theme--dark {
   color-scheme: dark;
-  --border: #2a2f3d;
-  --text: #f3f4f6;
-  --muted: #9aa3b2;
-  --bg: #0f1115;
-  --card: #0f1115;
-  --surface: #111622;
+  --border: #2f3237;
+  --text: #e6e6e6;
+  --muted: #a8adb4;
+  --bg: #202123;
+  --card: #202123;
+  --surface: #2b2d31;
   --primary: #10a37f;
-  --toast-bg: #0f2a22;
-  --toast-text: #e8fff7;
+  --toast-bg: #2b2d31;
+  --toast-text: #f1f1f1;
 }
 
 .app {
