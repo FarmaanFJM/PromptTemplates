@@ -150,28 +150,6 @@ async function handleCopy() {
   }
 }
 
-async function handleInsert() {
-  setStatus("");
-  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  if (!tab?.id) {
-    setStatus("No active tab found.");
-    return;
-  }
-  try {
-    const response = await chrome.tabs.sendMessage(tab.id, {
-      type: "INSERT_PROMPT",
-      payload: renderedOutput.value
-    });
-    if (response?.success) {
-      setStatus("Inserted into page.");
-    } else {
-      setStatus("Could not insert into the page.");
-    }
-  } catch (error) {
-    setStatus("Failed to communicate with the page.");
-  }
-}
-
 function encodeShareTemplate(template) {
   const json = JSON.stringify(template);
   const base64 = btoa(unescape(encodeURIComponent(json)));
@@ -275,6 +253,5 @@ newTemplateButton.addEventListener("click", () => {
 });
 
 copyButton.addEventListener("click", handleCopy);
-insertButton.addEventListener("click", handleInsert);
 
 init();
