@@ -11,7 +11,7 @@
   --surface: #ffffff;
   --primary: #2c6bed;
   --primary-hover: #245cd3;
-  --button-hover: #f1f4f9;
+  --button-hover: color-mix(in srgb, var(--surface) 88%, #000);
   --toast-bg: #1f2532;
   --toast-text: #ffffff;
 }
@@ -36,7 +36,7 @@ body.theme--dark {
   --surface: #2b2d31;
   --primary: #10a37f;
   --primary-hover: #0c8f6e;
-  --button-hover: #34363b;
+  --button-hover: color-mix(in srgb, var(--surface) 88%, #fff);
   --toast-bg: #2b2d31;
   --toast-text: #f1f1f1;
 }
@@ -135,10 +135,6 @@ body.theme--dark {
   gap: 8px;
 }
 
-.sidebar__actions {
-  display: flex;
-  gap: 6px;
-}
 
 .template-list {
   display: flex;
@@ -223,7 +219,6 @@ body.theme--dark {
 .button:hover,
 .button:focus-visible {
   background: var(--button-hover);
-  border-color: var(--primary);
 }
 
 .button:active {
