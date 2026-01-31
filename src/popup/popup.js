@@ -18,25 +18,52 @@ const importStatus = document.getElementById("importStatus");
 const copyButton = document.getElementById("copyButton");
 const insertButton = document.getElementById("insertButton");
 const newTemplateButton = document.getElementById("newTemplateButton");
+const deleteTemplateButton = document.getElementById("deleteTemplateButton");
 const statusMessage = document.getElementById("statusMessage");
+const themeToggle = document.getElementById("themeToggle");
 
 let state = null;
 let currentTemplateId = null;
 let variableValues = {};
 let blockValues = {};
+let statusTimeout = null;
+let currentTheme = "light";
 
 const SHARE_PREFIX = "prompttemplate://";
 
 function setStatus(message) {
   statusMessage.textContent = message;
+  if (!message) {
+    statusMessage.classList.remove("toast--visible");
+    return;
+  }
+  statusMessage.classList.add("toast--visible");
+  if (statusTimeout) {
+    window.clearTimeout(statusTimeout);
+  }
+  statusTimeout = window.setTimeout(() => {
+    statusMessage.classList.remove("toast--visible");
+  }, 2200);
 }
 
 function setImportStatus(message) {
   importStatus.textContent = message;
 }
 
+function applyTheme(theme) {
+  currentTheme = theme === "dark" ? "dark" : "light";
+  document.body.classList.toggle("theme--dark", currentTheme === "dark");
+  themeToggle.textContent =
+    currentTheme === "dark" ? "Light mode" : "Dark mode";
+  themeToggle.setAttribute("aria-pressed", currentTheme === "dark");
+}
+
 function getTemplateById(id) {
   return state.templates.find((template) => template.id === id);
+}
+
+function setDeleteButtonState() {
+  deleteTemplateButton.disabled = !currentTemplateId;
 }
 
 function generateTemplateId() {
@@ -174,6 +201,7 @@ function applyTemplateSelection(template) {
   buildTemplateList();
   promptTemplateInput.value = template.template;
   renderTemplateInputs(template);
+  setDeleteButtonState();
 }
 
 async function init() {
@@ -182,13 +210,22 @@ async function init() {
     state.templates = [];
     await saveState(state);
   }
+  if (!state.theme) {
+    state.theme = "light";
+    await saveState(state);
+  }
 
   buildTemplateList();
+  applyTheme(state.theme);
   currentTemplateId = state.templates[0]?.id ?? null;
 
   if (currentTemplateId) {
     const template = getTemplateById(currentTemplateId);
     applyTemplateSelection(template);
+  } else {
+    promptTemplateInput.value = "";
+    renderTemplateInputs(null);
+    setDeleteButtonState();
   }
 }
 
@@ -204,7 +241,7 @@ promptTemplateInput.addEventListener("input", () => {
 
 exportCopyButton.addEventListener("click", async () => {
   if (!exportTemplateOutput.value) {
-    setStatus("No layout selected.");
+    setStatus("No template selected.");
     return;
   }
   try {
@@ -224,7 +261,7 @@ importTemplateButton.addEventListener("click", () => {
   }
   const template = decodeShareTemplate(value);
   if (!template || !isValidTemplateSchema(template)) {
-    setImportStatus("Malformed layout data.");
+    setImportStatus("Malformed template data.");
     return;
   }
   const exists = state.templates.some((item) => item.id === template.id);
@@ -236,13 +273,13 @@ importTemplateButton.addEventListener("click", () => {
   saveState(state);
   applyTemplateSelection(newTemplate);
   importTemplateInput.value = "";
-  setImportStatus("Layout imported.");
+  setImportStatus("Template imported.");
 });
 
 newTemplateButton.addEventListener("click", () => {
   const newTemplate = {
     id: generateTemplateId(),
-    name: "New layout",
+    name: "New template",
     description: "",
     template: "Hi {{name}},\n\nThanks for reaching out about {{topic}}.",
     fields: []
@@ -252,6 +289,39 @@ newTemplateButton.addEventListener("click", () => {
   applyTemplateSelection(newTemplate);
 });
 
+deleteTemplateButton.addEventListener("click", () => {
+  if (!currentTemplateId) {
+    return;
+  }
+  const template = getTemplateById(currentTemplateId);
+  const shouldDelete = window.confirm(
+    `Delete template "${template?.name || currentTemplateId}"?`
+  );
+  if (!shouldDelete) {
+    return;
+  }
+  const nextTemplates = state.templates.filter(
+    (item) => item.id !== currentTemplateId
+  );
+  state.templates = nextTemplates;
+  saveState(state);
+  currentTemplateId = state.templates[0]?.id ?? null;
+  buildTemplateList();
+  if (currentTemplateId) {
+    applyTemplateSelection(getTemplateById(currentTemplateId));
+  } else {
+    promptTemplateInput.value = "";
+    renderTemplateInputs(null);
+    setDeleteButtonState();
+  }
+});
+
 copyButton.addEventListener("click", handleCopy);
+themeToggle.addEventListener("click", () => {
+  const nextTheme = currentTheme === "dark" ? "light" : "dark";
+  state.theme = nextTheme;
+  applyTheme(nextTheme);
+  saveState(state);
+});
 
 init();

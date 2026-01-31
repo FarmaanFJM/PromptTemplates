@@ -8,14 +8,16 @@
   </head>
   <body>
     <main class="app">
-      <header class="app__header">
-        <h1>PromptLayouts</h1>
-      </header>
-
       <section class="layout-shell">
+        <header class="app__header">
+          <h1>PromptTemplates</h1>
+          <button id="themeToggle" class="button button--ghost" type="button">
+            Dark mode
+          </button>
+        </header>
         <aside class="layout-shell__sidebar">
           <div class="sidebar__header">
-            <h2>Layouts</h2>
+            <h2>Templates</h2>
             <button id="newTemplateButton" class="button">New</button>
           </div>
           <div id="templateList" class="template-list"></div>
@@ -42,10 +44,17 @@
             <h2>Actions</h2>
             <div class="actions">
               <button id="copyButton" class="button">Copy Prompt</button>
+              <button
+                id="deleteTemplateButton"
+                class="button"
+                type="button"
+              >
+                Delete Template
+              </button>
             </div>
           </div>
           <div class="actions-block">
-            <h3>Export Layout</h3>
+            <h3>Export Template</h3>
             <textarea
               id="exportTemplateOutput"
               class="field__input"
@@ -55,7 +64,7 @@
             <button id="exportCopyButton" class="button">Copy export</button>
           </div>
           <div class="actions-block">
-            <h3>Import Layout</h3>
+            <h3>Import Template</h3>
             <textarea
               id="importTemplateInput"
               class="field__input"
@@ -68,7 +77,7 @@
         </section>
       </section>
 
-      <p id="statusMessage" class="muted" role="status" aria-live="polite"></p>
+      <div id="statusMessage" class="toast" role="status" aria-live="polite"></div>
     </main>
 
     <script type="module" src="popup.js"></script>
