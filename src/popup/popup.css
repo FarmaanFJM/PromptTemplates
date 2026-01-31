@@ -37,7 +37,7 @@ body.theme--dark {
   --primary: #10a37f;
   --primary-hover: #0c8f6e;
   --button-hover: color-mix(in srgb, var(--surface) 88%, #fff);
-  --toast-bg: #2b2d31;
+  --toast-bg: #555555;
   --toast-text: #f1f1f1;
 }
 
