@@ -1,29 +1,5 @@
 export const DEFAULT_TEMPLATES = [
   {
-    id: "design-brief",
-    name: "Design Brief",
-    description: "Clarify goals, context, and output requirements before writing prompts.",
-    template:
-      "## Context\n{Context}\n\n## Objective\n{Objective}\n\n## Audience\n{{Audience}}\n\n## Tone & Style\n{{Tone}}\n\n## Constraints\n{Constraints}\n\n## Output Requirements\n{OutputRequirements}\n\n## Success Criteria\n{SuccessCriteria}",
-    fields: []
-  },
-  {
-    id: "execution-plan",
-    name: "Execution Plan",
-    description: "Align delivery steps, files, and validation before implementing.",
-    template:
-      "## Summary\n{Summary}\n\n## Plan\n{Plan}\n\n## Files & Areas\n{Files}\n\n## Risks & Mitigations\n{Risks}\n\n## Validation\n{Validation}",
-    fields: []
-  },
-  {
-    id: "review-checklist",
-    name: "Review Checklist",
-    description: "Capture what to verify and edge cases before final output.",
-    template:
-      "## Scope\n{Scope}\n\n## Checks\n{Checks}\n\n## Edge Cases\n{EdgeCases}\n\n## Notes\n{Notes}",
-    fields: []
-  },
-  {
     id: "role-instruction-architect",
     name: "Role Instruction (Architect / Functionality Author)",
     description: "Direct a primary author to design and explain full, ordered batches.",
@@ -37,6 +13,54 @@ export const DEFAULT_TEMPLATES = [
     description: "Strictly apply provided batches without inventing new behavior.",
     template:
       "Role Instruction (Executor / Paster)\n\nYou are an implementation-only agent.\nYour job is to apply code exactly as provided, file by file, in the specified batch order.\nYou are not allowed to invent functionality, refactor logic, or reinterpret intent.\nYou may only:\n\ncreate or overwrite files exactly as given\n\nfix obvious compiler errors (e.g. undefined types, missing imports) without changing runtime behavior\nIf anything is ambiguous or missing, stop and report it instead of guessing.\nYour goal is faithful application, not design.\n\n{ Task }\n\n==================================================================",
+    fields: []
+  },
+  {
+    id: "role-instruction-reviewer",
+    name: "Role Instruction (Reviewer / QA)",
+    description: "Guide a reviewer to validate outputs for correctness and gaps.",
+    template:
+      "Role Instruction (Reviewer / QA)\n\nYou are responsible for reviewing the work before it ships.\nYou must validate correctness, completeness, and potential risks.\nProvide clear feedback grouped by severity and include steps to reproduce any issues.\nIf something is ambiguous, call it out explicitly and request clarification.\n\n{ Task }\n\n==================================================================",
+    fields: []
+  },
+  {
+    id: "role-instruction-editor",
+    name: "Role Instruction (Editor / Clarity)",
+    description: "Focus on rewriting for clarity, tone, and user friendliness.",
+    template:
+      "Role Instruction (Editor / Clarity)\n\nYou improve wording for clarity, brevity, and tone without changing meaning.\nYou may reorder sections for flow, but keep the intent and required constraints intact.\nReturn the rewritten content plus a brief list of notable changes.\n\n{ Task }\n\n==================================================================",
+    fields: []
+  },
+  {
+    id: "daily-standup",
+    name: "Daily Standup Update",
+    description: "Share progress, next steps, and blockers in a tight format.",
+    template:
+      "## Yesterday\n{Yesterday}\n\n## Today\n{Today}\n\n## Blockers\n{Blockers}\n\n## Help Needed\n{HelpNeeded}",
+    fields: []
+  },
+  {
+    id: "email-reply",
+    name: "Email Reply",
+    description: "Draft a clear, friendly response with action items.",
+    template:
+      "## Context\n{Context}\n\n## Recipient\n{{Recipient}}\n\n## Goal\n{Goal}\n\n## Key Points\n{KeyPoints}\n\n## Tone\n{{Tone}}\n\n## Draft Reply\n{Draft}",
+    fields: []
+  },
+  {
+    id: "meeting-recap",
+    name: "Meeting Recap",
+    description: "Summarize decisions and action items for follow-up.",
+    template:
+      "## Summary\n{Summary}\n\n## Decisions\n{Decisions}\n\n## Action Items\n{Actions}\n\n## Open Questions\n{Questions}",
+    fields: []
+  },
+  {
+    id: "task-planning",
+    name: "Task Planning",
+    description: "Break down a task with steps, owners, and deadlines.",
+    template:
+      "## Objective\n{Objective}\n\n## Steps\n{Steps}\n\n## Owners\n{Owners}\n\n## Due Dates\n{DueDates}\n\n## Risks\n{Risks}",
     fields: []
   }
 ];

@@ -3,7 +3,7 @@
 PromptTemplates is a lightweight browser extension for authoring reusable prompt layouts. It provides a three-pane popup that lets you pick a layout, edit the prompt template, fill variables and text blocks, and copy or insert the rendered prompt.
 
 ## Features
-- Built-in prompt layouts (Design Brief, Execution Plan, Review Checklist, Role Instruction templates).
+- Built-in prompt layouts (role instructions plus daily workflow templates like standups, email replies, and meeting recaps).
 - Editable prompt template with `{{variables}}` and `{text blocks}`.
 - Auto-generated inputs for detected variables and blocks.
 - Rendered prompt preview with one-click copy or insert.

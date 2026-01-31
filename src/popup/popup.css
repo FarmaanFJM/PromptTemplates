@@ -6,7 +6,7 @@
   --border: #d7dbe2;
   --text: #1f2532;
   --muted: #5c6475;
-  --bg: #f7f8fa;
+  --bg: #ffffff;
   --card: #ffffff;
   --surface: #ffffff;
   --primary: #2c6bed;
@@ -30,7 +30,7 @@ body.theme--dark {
   --text: #f3f4f6;
   --muted: #9aa3b2;
   --bg: #0f1115;
-  --card: #171b26;
+  --card: #0f1115;
   --surface: #111622;
   --primary: #10a37f;
   --toast-bg: #0f2a22;
@@ -40,10 +40,8 @@ body.theme--dark {
 .app {
   width: 100vw;
   min-height: 100vh;
-  padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
 }
 
 .app__header h1 {
@@ -56,6 +54,8 @@ body.theme--dark {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 12px;
 }
 
 .card {
@@ -97,10 +97,13 @@ body.theme--dark {
   grid-template-columns: 150px minmax(0, 1fr) 200px;
   gap: 16px;
   background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 16px;
+  border: none;
   padding: 16px;
-  min-height: calc(100vh - 80px);
+  min-height: 100vh;
+}
+
+.layout-shell > .app__header {
+  grid-column: 1 / -1;
 }
 
 .layout-shell__sidebar,
