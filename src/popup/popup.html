@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PromptTemplates</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <main class="app">
+      <header class="app__header">
+        <h1>PromptTemplates</h1>
+      </header>
+
+      <section class="card">
+        <label class="field">
+          <span class="field__label">Template</span>
+          <select id="templateSelect" class="field__input"></select>
+        </label>
+        <div class="actions">
+          <button id="pinTemplateButton" class="button">Pin</button>
+          <button id="shareTemplateButton" class="button">Share</button>
+        </div>
+        <p id="templateDescription" class="muted"></p>
+        <label class="field">
+          <span class="field__label">Import shared template</span>
+          <textarea
+            id="importTemplateInput"
+            class="field__input"
+            rows="3"
+            placeholder="prompttemplate://..."
+          ></textarea>
+        </label>
+        <button id="importTemplateButton" class="button">Import</button>
+      </section>
+
+      <section class="card" id="fieldsContainer">
+        <h2>Fill Fields</h2>
+        <div id="fieldsForm" class="fields"></div>
+      </section>
+
+      <section class="card" id="editorSection">
+        <div class="editor__header">
+          <h2>Template Editor</h2>
+          <div class="actions">
+            <button id="newTemplateButton" class="button">New</button>
+            <button id="deleteTemplateButton" class="button">Delete</button>
+          </div>
+        </div>
+        <label class="field">
+          <span class="field__label">Name</span>
+          <input id="editorName" class="field__input" type="text" />
+        </label>
+        <label class="field">
+          <span class="field__label">Description</span>
+          <input id="editorDescription" class="field__input" type="text" />
+        </label>
+        <label class="field">
+          <span class="field__label">Template</span>
+          <textarea id="editorTemplate" class="field__input template-editor" rows="6"></textarea>
+        </label>
+        <div class="fields-editor">
+          <div class="fields-editor__header">
+            <h3>Fields Editor</h3>
+            <button id="addFieldButton" class="button">Add field</button>
+          </div>
+          <div id="fieldsEditorList" class="fields-editor__list"></div>
+        </div>
+      </section>
+
+      <section class="card" id="warningsSection">
+        <h2>Warnings</h2>
+        <div class="warnings">
+          <div>
+            <h3>Unknown placeholders</h3>
+            <ul id="unknownPlaceholdersList" class="warnings__list"></ul>
+          </div>
+          <div>
+            <h3>Unused fields</h3>
+            <ul id="unusedFieldsList" class="warnings__list"></ul>
+          </div>
+        </div>
+        <p id="warningsEmpty" class="muted">No warnings.</p>
+      </section>
+
+      <section class="card">
+        <h2>Rendered Prompt</h2>
+        <textarea id="renderedOutput" class="output" readonly></textarea>
+        <div class="actions">
+          <button id="copyButton" class="button">Copy</button>
+          <button id="insertButton" class="button button--primary">Insert</button>
+        </div>
+        <p id="statusMessage" class="muted" role="status" aria-live="polite"></p>
+      </section>
+    </main>
+
+    <script type="module" src="popup.js"></script>
+  </body>
+</html>
