@@ -16,7 +16,6 @@ const importTemplateInput = document.getElementById("importTemplateInput");
 const importTemplateButton = document.getElementById("importTemplateButton");
 const importStatus = document.getElementById("importStatus");
 const copyButton = document.getElementById("copyButton");
-const insertButton = document.getElementById("insertButton");
 const newTemplateButton = document.getElementById("newTemplateButton");
 const deleteTemplateButton = document.getElementById("deleteTemplateButton");
 const statusMessage = document.getElementById("statusMessage");
