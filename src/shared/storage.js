@@ -3,8 +3,8 @@ import { DEFAULT_STATE } from "./defaults.js";
 const STORAGE_KEY = "promptTemplates";
 
 const storage =
-  globalThis.browser?.storage?.sync ??
-  globalThis.chrome?.storage?.sync;
+  globalThis.browser?.storage?.local ??
+  globalThis.chrome?.storage?.local;
 
 if (!storage) {
   throw new Error("Storage API unavailable");

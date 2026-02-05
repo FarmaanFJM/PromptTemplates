@@ -28,10 +28,20 @@ let variableValues = {};
 let blockValues = {};
 let statusTimeout = null;
 let currentTheme = "light";
+let saveDebounceTimer = null;
 
 const SHARE_PREFIX = "prompttemplate://";
 const MAX_IMPORT_CHARS = 100 * 1024;
 const BASE64_PATTERN = /^[A-Za-z0-9+/=]+$/;
+
+function debounce(fn, delay) {
+  return function (...args) {
+    if (saveDebounceTimer) {
+      clearTimeout(saveDebounceTimer);
+    }
+    saveDebounceTimer = setTimeout(() => fn(...args), delay);
+  };
+}
 
 function setStatus(message) {
   statusMessage.textContent = message;
@@ -249,33 +259,37 @@ async function init() {
   }
 }
 
-templateNameInput.addEventListener("input", async () => {
+const debouncedSave = debounce(async () => {
+  await saveState(state);
+}, 500);
+
+templateNameInput.addEventListener("input", () => {
   const template = getTemplateById(currentTemplateId);
   if (!template) {
     return;
   }
   template.name = templateNameInput.value;
-  await saveState(state);
   buildTemplateList();
+  debouncedSave();
 });
 
-templateDescriptionInput.addEventListener("input", async () => {
+templateDescriptionInput.addEventListener("input", () => {
   const template = getTemplateById(currentTemplateId);
   if (!template) {
     return;
   }
   template.description = templateDescriptionInput.value;
-  await saveState(state);
+  debouncedSave();
 });
 
-promptTemplateInput.addEventListener("input", async () => {
+promptTemplateInput.addEventListener("input", () => {
   const template = getTemplateById(currentTemplateId);
   if (!template) {
     return;
   }
   template.template = promptTemplateInput.value;
-  await saveState(state);
   renderTemplateInputs(template);
+  debouncedSave();
 });
 
 exportCopyButton.addEventListener("click", async () => {
