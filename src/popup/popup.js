@@ -43,6 +43,20 @@ function debounce(fn, delay) {
   };
 }
 
+const saveTemplateInputValues = debounce(async () => {
+  if (!currentTemplateId) {
+    return;
+  }
+  if (!state.templateInputValues) {
+    state.templateInputValues = {};
+  }
+  state.templateInputValues[currentTemplateId] = {
+    variables: { ...variableValues },
+    blocks: { ...blockValues }
+  };
+  await saveState(state);
+}, 500);
+
 function setStatus(message) {
   statusMessage.textContent = message;
   if (!message) {
@@ -128,8 +142,11 @@ function renderTemplateInputs(template) {
   promptTemplateInput.disabled = false;
   const tokens = extractOverviewTokens(template.template);
 
+  // Restore saved input values for this template
+  const savedValues = state.templateInputValues?.[template.id] || { variables: {}, blocks: {} };
+
   tokens.variables.forEach((variable) => {
-    variableValues[variable] = "";
+    variableValues[variable] = savedValues.variables[variable] || "";
     const field = document.createElement("label");
     field.className = "field";
     const label = document.createElement("span");
@@ -138,16 +155,18 @@ function renderTemplateInputs(template) {
     const input = document.createElement("input");
     input.className = "field__input";
     input.type = "text";
+    input.value = variableValues[variable];
     input.addEventListener("input", () => {
       variableValues[variable] = input.value;
       updateRenderedOutput();
+      saveTemplateInputValues();
     });
     field.append(label, input);
     overviewInputs.append(field);
   });
 
   tokens.blocks.forEach((block) => {
-    blockValues[block] = "";
+    blockValues[block] = savedValues.blocks[block] || "";
     const field = document.createElement("label");
     field.className = "field";
     const label = document.createElement("span");
@@ -156,9 +175,11 @@ function renderTemplateInputs(template) {
     const textarea = document.createElement("textarea");
     textarea.className = "field__input";
     textarea.rows = 3;
+    textarea.value = blockValues[block];
     textarea.addEventListener("input", () => {
       blockValues[block] = textarea.value;
       updateRenderedOutput();
+      saveTemplateInputValues();
     });
     field.append(label, textarea);
     overviewInputs.append(field);
@@ -242,6 +263,10 @@ async function init() {
   }
   if (!state.theme) {
     state.theme = "light";
+    await saveState(state);
+  }
+  if (!state.templateInputValues) {
+    state.templateInputValues = {};
     await saveState(state);
   }
 
