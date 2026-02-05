@@ -6,7 +6,8 @@ import {
 } from "../shared/templating.js";
 console.log("popup.js loaded");
 const templateList = document.getElementById("templateList");
-const templateDescription = document.getElementById("templateDescription");
+const templateNameInput = document.getElementById("templateNameInput");
+const templateDescriptionInput = document.getElementById("templateDescriptionInput");
 const promptTemplateInput = document.getElementById("promptTemplateInput");
 const overviewInputs = document.getElementById("overviewInputs");
 const renderedOutput = document.getElementById("renderedOutput");
@@ -27,10 +28,34 @@ let variableValues = {};
 let blockValues = {};
 let statusTimeout = null;
 let currentTheme = "light";
+let saveDebounceTimer = null;
 
 const SHARE_PREFIX = "prompttemplate://";
 const MAX_IMPORT_CHARS = 100 * 1024;
 const BASE64_PATTERN = /^[A-Za-z0-9+/=]+$/;
+
+function debounce(fn, delay) {
+  return function (...args) {
+    if (saveDebounceTimer) {
+      clearTimeout(saveDebounceTimer);
+    }
+    saveDebounceTimer = setTimeout(() => fn(...args), delay);
+  };
+}
+
+const saveTemplateInputValues = debounce(async () => {
+  if (!currentTemplateId) {
+    return;
+  }
+  if (!state.templateInputValues) {
+    state.templateInputValues = {};
+  }
+  state.templateInputValues[currentTemplateId] = {
+    variables: { ...variableValues },
+    blocks: { ...blockValues }
+  };
+  await saveState(state);
+}, 500);
 
 function setStatus(message) {
   statusMessage.textContent = message;
@@ -100,17 +125,28 @@ function renderTemplateInputs(template) {
   blockValues = {};
 
   if (!template) {
-    templateDescription.textContent = "";
+    templateNameInput.value = "";
+    templateNameInput.disabled = true;
+    templateDescriptionInput.value = "";
+    templateDescriptionInput.disabled = true;
+    promptTemplateInput.disabled = true;
     renderedOutput.value = "";
     exportTemplateOutput.value = "";
     return;
   }
 
-  templateDescription.textContent = template.description;
+  templateNameInput.value = template.name || "";
+  templateNameInput.disabled = false;
+  templateDescriptionInput.value = template.description || "";
+  templateDescriptionInput.disabled = false;
+  promptTemplateInput.disabled = false;
   const tokens = extractOverviewTokens(template.template);
 
+  // Restore saved input values for this template
+  const savedValues = state.templateInputValues?.[template.id] || { variables: {}, blocks: {} };
+
   tokens.variables.forEach((variable) => {
-    variableValues[variable] = "";
+    variableValues[variable] = savedValues.variables[variable] || "";
     const field = document.createElement("label");
     field.className = "field";
     const label = document.createElement("span");
@@ -119,16 +155,18 @@ function renderTemplateInputs(template) {
     const input = document.createElement("input");
     input.className = "field__input";
     input.type = "text";
+    input.value = variableValues[variable];
     input.addEventListener("input", () => {
       variableValues[variable] = input.value;
       updateRenderedOutput();
+      saveTemplateInputValues();
     });
     field.append(label, input);
     overviewInputs.append(field);
   });
 
   tokens.blocks.forEach((block) => {
-    blockValues[block] = "";
+    blockValues[block] = savedValues.blocks[block] || "";
     const field = document.createElement("label");
     field.className = "field";
     const label = document.createElement("span");
@@ -137,9 +175,11 @@ function renderTemplateInputs(template) {
     const textarea = document.createElement("textarea");
     textarea.className = "field__input";
     textarea.rows = 3;
+    textarea.value = blockValues[block];
     textarea.addEventListener("input", () => {
       blockValues[block] = textarea.value;
       updateRenderedOutput();
+      saveTemplateInputValues();
     });
     field.append(label, textarea);
     overviewInputs.append(field);
@@ -225,6 +265,10 @@ async function init() {
     state.theme = "light";
     await saveState(state);
   }
+  if (!state.templateInputValues) {
+    state.templateInputValues = {};
+    await saveState(state);
+  }
 
   buildTemplateList();
   applyTheme(state.theme);
@@ -240,14 +284,37 @@ async function init() {
   }
 }
 
+const debouncedSave = debounce(async () => {
+  await saveState(state);
+}, 500);
+
+templateNameInput.addEventListener("input", () => {
+  const template = getTemplateById(currentTemplateId);
+  if (!template) {
+    return;
+  }
+  template.name = templateNameInput.value;
+  buildTemplateList();
+  debouncedSave();
+});
+
+templateDescriptionInput.addEventListener("input", () => {
+  const template = getTemplateById(currentTemplateId);
+  if (!template) {
+    return;
+  }
+  template.description = templateDescriptionInput.value;
+  debouncedSave();
+});
+
 promptTemplateInput.addEventListener("input", () => {
   const template = getTemplateById(currentTemplateId);
   if (!template) {
     return;
   }
   template.template = promptTemplateInput.value;
-  saveState(state);
   renderTemplateInputs(template);
+  debouncedSave();
 });
 
 exportCopyButton.addEventListener("click", async () => {
@@ -263,7 +330,7 @@ exportCopyButton.addEventListener("click", async () => {
   }
 });
 
-importTemplateButton.addEventListener("click", () => {
+importTemplateButton.addEventListener("click", async () => {
   setImportStatus("");
   const value = importTemplateInput.value.trim();
   if (!value.startsWith(SHARE_PREFIX)) {
@@ -290,7 +357,7 @@ importTemplateButton.addEventListener("click", () => {
     return exists ? { ...template, id: generateTemplateId() } : template;
   });
   state.templates.push(...newTemplates);
-  saveState(state);
+  await saveState(state);
   applyTemplateSelection(newTemplates[0]);
   importTemplateInput.value = "";
   setImportStatus(
@@ -298,7 +365,7 @@ importTemplateButton.addEventListener("click", () => {
   );
 });
 
-newTemplateButton.addEventListener("click", () => {
+newTemplateButton.addEventListener("click", async () => {
   const newTemplate = {
     id: generateTemplateId(),
     name: "New template",
@@ -307,11 +374,11 @@ newTemplateButton.addEventListener("click", () => {
     fields: []
   };
   state.templates.push(newTemplate);
-  saveState(state);
+  await saveState(state);
   applyTemplateSelection(newTemplate);
 });
 
-deleteTemplateButton.addEventListener("click", () => {
+deleteTemplateButton.addEventListener("click", async () => {
   if (!currentTemplateId) {
     return;
   }
@@ -326,7 +393,7 @@ deleteTemplateButton.addEventListener("click", () => {
     (item) => item.id !== currentTemplateId
   );
   state.templates = nextTemplates;
-  saveState(state);
+  await saveState(state);
   currentTemplateId = state.templates[0]?.id ?? null;
   buildTemplateList();
   if (currentTemplateId) {
@@ -339,11 +406,11 @@ deleteTemplateButton.addEventListener("click", () => {
 });
 
 copyButton.addEventListener("click", handleCopy);
-themeToggle.addEventListener("click", () => {
+themeToggle.addEventListener("click", async () => {
   const nextTheme = currentTheme === "dark" ? "light" : "dark";
   state.theme = nextTheme;
   applyTheme(nextTheme);
-  saveState(state);
+  await saveState(state);
 });
 
 init();
