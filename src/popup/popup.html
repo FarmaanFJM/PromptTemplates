@@ -26,8 +26,15 @@
         <section class="layout-shell__main">
           <div class="overview__header">
             <h2>Prompt Template</h2>
-            <p id="templateDescription" class="muted"></p>
           </div>
+          <label class="field">
+            <span class="field__label">Name</span>
+            <input id="templateNameInput" class="field__input" type="text" placeholder="Template name" />
+          </label>
+          <label class="field">
+            <span class="field__label">Description</span>
+            <textarea id="templateDescriptionInput" class="field__input" rows="2" placeholder="Optional description"></textarea>
+          </label>
           <label class="field">
             <span class="field__label">Template</span>
             <textarea id="promptTemplateInput" class="field__input" rows="8"></textarea>

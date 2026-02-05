@@ -6,7 +6,8 @@ import {
 } from "../shared/templating.js";
 console.log("popup.js loaded");
 const templateList = document.getElementById("templateList");
-const templateDescription = document.getElementById("templateDescription");
+const templateNameInput = document.getElementById("templateNameInput");
+const templateDescriptionInput = document.getElementById("templateDescriptionInput");
 const promptTemplateInput = document.getElementById("promptTemplateInput");
 const overviewInputs = document.getElementById("overviewInputs");
 const renderedOutput = document.getElementById("renderedOutput");
@@ -100,13 +101,21 @@ function renderTemplateInputs(template) {
   blockValues = {};
 
   if (!template) {
-    templateDescription.textContent = "";
+    templateNameInput.value = "";
+    templateNameInput.disabled = true;
+    templateDescriptionInput.value = "";
+    templateDescriptionInput.disabled = true;
+    promptTemplateInput.disabled = true;
     renderedOutput.value = "";
     exportTemplateOutput.value = "";
     return;
   }
 
-  templateDescription.textContent = template.description;
+  templateNameInput.value = template.name || "";
+  templateNameInput.disabled = false;
+  templateDescriptionInput.value = template.description || "";
+  templateDescriptionInput.disabled = false;
+  promptTemplateInput.disabled = false;
   const tokens = extractOverviewTokens(template.template);
 
   tokens.variables.forEach((variable) => {
@@ -240,13 +249,32 @@ async function init() {
   }
 }
 
-promptTemplateInput.addEventListener("input", () => {
+templateNameInput.addEventListener("input", async () => {
+  const template = getTemplateById(currentTemplateId);
+  if (!template) {
+    return;
+  }
+  template.name = templateNameInput.value;
+  await saveState(state);
+  buildTemplateList();
+});
+
+templateDescriptionInput.addEventListener("input", async () => {
+  const template = getTemplateById(currentTemplateId);
+  if (!template) {
+    return;
+  }
+  template.description = templateDescriptionInput.value;
+  await saveState(state);
+});
+
+promptTemplateInput.addEventListener("input", async () => {
   const template = getTemplateById(currentTemplateId);
   if (!template) {
     return;
   }
   template.template = promptTemplateInput.value;
-  saveState(state);
+  await saveState(state);
   renderTemplateInputs(template);
 });
 
@@ -263,7 +291,7 @@ exportCopyButton.addEventListener("click", async () => {
   }
 });
 
-importTemplateButton.addEventListener("click", () => {
+importTemplateButton.addEventListener("click", async () => {
   setImportStatus("");
   const value = importTemplateInput.value.trim();
   if (!value.startsWith(SHARE_PREFIX)) {
@@ -290,7 +318,7 @@ importTemplateButton.addEventListener("click", () => {
     return exists ? { ...template, id: generateTemplateId() } : template;
   });
   state.templates.push(...newTemplates);
-  saveState(state);
+  await saveState(state);
   applyTemplateSelection(newTemplates[0]);
   importTemplateInput.value = "";
   setImportStatus(
@@ -298,7 +326,7 @@ importTemplateButton.addEventListener("click", () => {
   );
 });
 
-newTemplateButton.addEventListener("click", () => {
+newTemplateButton.addEventListener("click", async () => {
   const newTemplate = {
     id: generateTemplateId(),
     name: "New template",
@@ -307,11 +335,11 @@ newTemplateButton.addEventListener("click", () => {
     fields: []
   };
   state.templates.push(newTemplate);
-  saveState(state);
+  await saveState(state);
   applyTemplateSelection(newTemplate);
 });
 
-deleteTemplateButton.addEventListener("click", () => {
+deleteTemplateButton.addEventListener("click", async () => {
   if (!currentTemplateId) {
     return;
   }
@@ -326,7 +354,7 @@ deleteTemplateButton.addEventListener("click", () => {
     (item) => item.id !== currentTemplateId
   );
   state.templates = nextTemplates;
-  saveState(state);
+  await saveState(state);
   currentTemplateId = state.templates[0]?.id ?? null;
   buildTemplateList();
   if (currentTemplateId) {
@@ -339,11 +367,11 @@ deleteTemplateButton.addEventListener("click", () => {
 });
 
 copyButton.addEventListener("click", handleCopy);
-themeToggle.addEventListener("click", () => {
+themeToggle.addEventListener("click", async () => {
   const nextTheme = currentTheme === "dark" ? "light" : "dark";
   state.theme = nextTheme;
   applyTheme(nextTheme);
-  saveState(state);
+  await saveState(state);
 });
 
 init();
