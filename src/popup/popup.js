@@ -174,7 +174,7 @@ function renderTemplateInputs(template) {
     label.textContent = block;
     const textarea = document.createElement("textarea");
     textarea.className = "field__input";
-    textarea.rows = 3;
+    textarea.rows = 6;
     textarea.value = blockValues[block];
     textarea.addEventListener("input", () => {
       blockValues[block] = textarea.value;
@@ -249,10 +249,12 @@ function decodeShareTemplate(payload) {
 
 function applyTemplateSelection(template) {
   currentTemplateId = template.id;
+  state.activeTemplateId = template.id;
   buildTemplateList();
   promptTemplateInput.value = template.template;
   renderTemplateInputs(template);
   setDeleteButtonState();
+  debouncedSave();
 }
 
 async function init() {
@@ -272,7 +274,10 @@ async function init() {
 
   buildTemplateList();
   applyTheme(state.theme);
-  currentTemplateId = state.templates[0]?.id ?? null;
+
+  const savedActiveId = state.activeTemplateId;
+  const savedTemplate = savedActiveId ? getTemplateById(savedActiveId) : null;
+  currentTemplateId = savedTemplate ? savedActiveId : (state.templates[0]?.id ?? null);
 
   if (currentTemplateId) {
     const template = getTemplateById(currentTemplateId);
@@ -393,8 +398,9 @@ deleteTemplateButton.addEventListener("click", async () => {
     (item) => item.id !== currentTemplateId
   );
   state.templates = nextTemplates;
-  await saveState(state);
   currentTemplateId = state.templates[0]?.id ?? null;
+  state.activeTemplateId = currentTemplateId;
+  await saveState(state);
   buildTemplateList();
   if (currentTemplateId) {
     applyTemplateSelection(getTemplateById(currentTemplateId));

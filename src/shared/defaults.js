@@ -104,5 +104,6 @@ export const DEFAULT_STATE = {
   templates: DEFAULT_TEMPLATES,
   pinnedTemplatesByHost: {},
   theme: "light",
-  templateInputValues: {}
+  templateInputValues: {},
+  activeTemplateId: null
 };
