@@ -169,6 +169,11 @@ html, body {
   gap: 10px;
 }
 
+.overview-inputs textarea.field__input {
+  min-height: 120px;
+  resize: vertical;
+}
+
 .overview-output {
   display: flex;
   flex-direction: column;
